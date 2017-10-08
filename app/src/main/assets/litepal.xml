@@ -1,6 +1,6 @@
 <litepal>
     <dbname value="cool_weather"/>
-    <version value=""/>
+    <version value="1"/>
 
     <list>
         <mapping class="com.lanhai.coolweather.db.Province"></mapping>
