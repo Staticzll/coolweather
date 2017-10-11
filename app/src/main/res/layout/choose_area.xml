@@ -28,6 +28,7 @@
     </RelativeLayout>
 
     <ListView
+        android:background="#fff"
         android:id="@+id/list_viwe"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></ListView>
