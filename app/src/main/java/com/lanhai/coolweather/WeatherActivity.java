@@ -1,5 +1,6 @@
 package com.lanhai.coolweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.lanhai.coolweather.gson.Weather;
+import com.lanhai.coolweather.service.AutoUpdateService;
 import com.lanhai.coolweather.util.HttpUtil;
 import com.lanhai.coolweather.util.LogUtil;
 import com.lanhai.coolweather.util.Utility;
@@ -194,40 +196,46 @@ public class WeatherActivity extends AppCompatActivity {
      * @param weather
      */
     private void showWeatherInfo(Weather weather) {
-        Weather.HeWeather5Bean heWeather5Bean = weather.getHeWeather5().get(0);
-        String cityName = heWeather5Bean.getBasic().getCity();
-        String updatTime = heWeather5Bean.getBasic().getUpdate().getLoc().split(" ")[1];
-        String degree = heWeather5Bean.getNow().getTmp() + "℃";
-        String weatherInfo = heWeather5Bean.getNow().getCond().getTxt();
-        titleCity.setText(cityName);
-        titleUpdateTime.setText(updatTime);
-        degreeText.setText(degree);
-        weatherInfoText.setText(weatherInfo);
-        forecastLayout.removeAllViews();
-        for (Weather.HeWeather5Bean.DailyForecastBean forecast : heWeather5Bean.getDaily_forecast()) {
-            View view = LayoutInflater.from(WeatherActivity.this).inflate(R.layout.forecast_item, forecastLayout, false);
-            dateText = (TextView) view.findViewById(R.id.date_text);
-            infoText = (TextView) view.findViewById(R.id.info_text);
-            maxText = (TextView) view.findViewById(R.id.max_text);
-            minText = (TextView) view.findViewById(R.id.min_text);
-            dateText.setText(forecast.getDate());
-            infoText.setText(forecast.getCond().getTxt_d());
-            maxText.setText(forecast.getTmp().getMax());
-            minText.setText(forecast.getTmp().getMin());
-            forecastLayout.addView(view);
-        }
-        if (heWeather5Bean.getAqi() != null) {
-            aqiText.setText(heWeather5Bean.getAqi().getCity().getAqi());
-            pm25Text.setText(heWeather5Bean.getAqi().getCity().getPm25());
-        }
+        if (weather != null && "ok".equals(weather.getHeWeather5().get(0).getStatus())) {
+            Intent i = new Intent(this, AutoUpdateService.class);
+            startService(i);
+            Weather.HeWeather5Bean heWeather5Bean = weather.getHeWeather5().get(0);
+            String cityName = heWeather5Bean.getBasic().getCity();
+            String updatTime = heWeather5Bean.getBasic().getUpdate().getLoc().split(" ")[1];
+            String degree = heWeather5Bean.getNow().getTmp() + "℃";
+            String weatherInfo = heWeather5Bean.getNow().getCond().getTxt();
+            titleCity.setText(cityName);
+            titleUpdateTime.setText(updatTime);
+            degreeText.setText(degree);
+            weatherInfoText.setText(weatherInfo);
+            forecastLayout.removeAllViews();
+            for (Weather.HeWeather5Bean.DailyForecastBean forecast : heWeather5Bean.getDaily_forecast()) {
+                View view = LayoutInflater.from(WeatherActivity.this).inflate(R.layout.forecast_item, forecastLayout, false);
+                dateText = (TextView) view.findViewById(R.id.date_text);
+                infoText = (TextView) view.findViewById(R.id.info_text);
+                maxText = (TextView) view.findViewById(R.id.max_text);
+                minText = (TextView) view.findViewById(R.id.min_text);
+                dateText.setText(forecast.getDate());
+                infoText.setText(forecast.getCond().getTxt_d());
+                maxText.setText(forecast.getTmp().getMax());
+                minText.setText(forecast.getTmp().getMin());
+                forecastLayout.addView(view);
+            }
+            if (heWeather5Bean.getAqi() != null) {
+                aqiText.setText(heWeather5Bean.getAqi().getCity().getAqi());
+                pm25Text.setText(heWeather5Bean.getAqi().getCity().getPm25());
+            }
 
-        String comfort = "舒适度：" + heWeather5Bean.getSuggestion().getComf().getTxt();
-        String carWash = "洗车指数：" + heWeather5Bean.getSuggestion().getCw().getTxt();
-        String sport = "运动指数：" + heWeather5Bean.getSuggestion().getSport().getTxt();
-        comfortText.setText(comfort);
-        carWashText.setText(carWash);
-        sportText.setText(sport);
-        weatherLayout.setVisibility(View.VISIBLE);
+            String comfort = "舒适度：" + heWeather5Bean.getSuggestion().getComf().getTxt();
+            String carWash = "洗车指数：" + heWeather5Bean.getSuggestion().getCw().getTxt();
+            String sport = "运动指数：" + heWeather5Bean.getSuggestion().getSport().getTxt();
+            comfortText.setText(comfort);
+            carWashText.setText(carWash);
+            sportText.setText(sport);
+            weatherLayout.setVisibility(View.VISIBLE);
+        } else {
+            Toast.makeText(this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+        }
 
     }
 }
